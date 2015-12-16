@@ -6,13 +6,12 @@
 <%
 '###########################################################################
 ' blokada na extranet
-If Request.ServerVariables("remote_addr") = "149.156.89.220" Then
+If Request.ServerVariables("remote_addr") = "149.156.89.220" Or Request.ServerVariables("remote_addr") = "89.77.88.189" Then
 	' nothing - give user access
 Else
-	echo "<html><head><meta charset='utf-8' /><title>$REPO</title><style>body{background-color: red;} h1{font-size: 36px;}</style></head><body><h1><center>repozytorium materiałów $REPO<br />jest dostępne tylko dla stduentów UJ przez extranet<br />-<br />zaloguj się na <a href='https://extranet.uj.edu.pl/,DanaInfo=$REPO'>https://extranet.uj.edu.pl/</a><br />za pomocą konta USOSweb,<br />cofnij się na tą stronę i kliknij jeszcze raz w link.</center></h1></body></html>"
+	echo "<html><head><meta charset='utf-8' /><title>$REPO</title><style>body{background-color: red;} h1{font-size: 36px;}</style></head><body><h1><center>$REPO<br />jest dostępne tylko dla stduentów UJ przez extranet<br />-<br />zaloguj się na <a href='https://extranet.uj.edu.pl/,DanaInfo=$REPO'>https://extranet.uj.edu.pl/</a><br />za pomocą konta USOSweb,<br />cofnij się na tą stronę i kliknij jeszcze raz w link.</center></h1></body></html>"
 	Response.End
 End If
-
 '###########################################################################
 '# 
 '#  Version History
@@ -62,16 +61,12 @@ End If
 '# 1.6.2
 '# 2009-12-08: - Fixed case sensitivity issue for arrPathsToExclude
 '# 
-'# 1.9.9
-'# 2015-05-10 - Adaptations for KSI - translations, styling
-'# 
-'# 2.0.0
-'# 2015-08-13 - IP blocking
-'# 
 '# 
 '##########  
 
-Const Version = "2.0.0 (2015/08/13)"
+
+'Const Version = "1.6.2 (2009/12/08)"
+Const Version = "1.9.9 (2015/05/10)"
 
 
 '###########################################################################
@@ -150,7 +145,6 @@ Dim arrDefaultDocumentList
 
 arrDefaultDocumentList = Array ( _
                       "default.aspx" _
-                    , "default.asp" _
                     , "default.html" _
                     , "default.htm" _
                     , "index.aspx" _
@@ -297,7 +291,7 @@ Sub DumpHtmlBody
   echo "<body>"
   echo "<table width=""100%""  border=""0"">"
   echo "<tr valign=""top"">"
-  echo "<td width=""84%"" class=""h1"">" & PageTitle & "</td>"
+  echo "<td width=""84%"" class=""h1"">" & PageTitle & "<br />nie ma czegoś? znajdź i wyślij na mordor@ksi.ii.uj.edu.pl to dodamy</td>"
   echo "<td width=""16%"" align=""right"">&nbsp;</td>"
   echo "</tr>"
   echo "</table>"
@@ -441,8 +435,10 @@ Sub ScriptInit
 	Dim sRedirectURL
 	
   For Each thing In oFiles
-  
-		'Look for a default document in this folder. If found, display it. 
+	If LCase(FolderSpec & "/" & thing.Name) = "//default.asp" Then Exit For  End If 
+	'if requested file is script itself do not redirect to it
+	
+	'Look for a default document in this folder. If found, display it. 
   	If InArray(thing.Name, arrDefaultDocumentList) Then 
   		If LCase(FolderSpec & "/" & thing.Name) <> LCase(Pathinfo()) Then 
   			sRedirectURL = FolderSpec & "/" & thing.Name
